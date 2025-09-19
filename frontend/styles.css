@@ -405,6 +405,244 @@ body {
     order: -1;
 }
 
+/* Empty State 스타일 */
+.empty-state-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 64px 32px;
+    text-align: center;
+    border: 1px solid #e6e6e6;
+    margin-bottom: 32px;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    color: #cccccc;
+    margin-bottom: 24px;
+}
+
+.empty-state-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #666666;
+    margin-bottom: 16px;
+}
+
+.empty-state-description {
+    font-size: 16px;
+    color: #999999;
+    margin-bottom: 32px;
+}
+
+.empty-state-button {
+    background-color: #e50012;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.empty-state-button:hover {
+    background-color: #cc000d;
+}
+
+/* Empty Materials State */
+.empty-materials-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-materials-icon {
+    font-size: 48px;
+    color: #cccccc;
+    margin-bottom: 16px;
+}
+
+.empty-materials-message {
+    font-size: 16px;
+    color: #999999;
+    margin-bottom: 24px;
+}
+
+.start-collection-button {
+    background-color: #00c7bf;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.start-collection-button:hover {
+    background-color: #00b2ad;
+}
+
+/* Empty Completed State */
+.empty-completed-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-completed-icon {
+    font-size: 48px;
+    color: #cccccc;
+    margin-bottom: 16px;
+}
+
+.empty-completed-message {
+    font-size: 16px;
+    color: #999999;
+    margin-bottom: 24px;
+}
+
+.first-handover-button {
+    background-color: #e50012;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.first-handover-button:hover {
+    background-color: #cc000d;
+}
+
+/* System Error State */
+.system-error-state {
+    background-color: #fff2f2;
+    border: 1px solid #ffcccc;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.error-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #cc3333;
+    margin-bottom: 8px;
+}
+
+.error-message {
+    font-size: 14px;
+    color: #cc3333;
+    margin-bottom: 16px;
+}
+
+.retry-connection-button {
+    background-color: #cc3333;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.retry-connection-button:hover {
+    background-color: #b30000;
+}
+
+/* Global Error Overlay */
+.global-error-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.error-modal {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.error-modal-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.error-modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #cc3333;
+    margin-bottom: 12px;
+}
+
+.error-modal-message {
+    font-size: 16px;
+    color: #666666;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.error-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.retry-button {
+    background-color: #e50012;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.retry-button:hover {
+    background-color: #cc000d;
+}
+
+.contact-admin-button {
+    background-color: #f5f5f5;
+    color: #333333;
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.contact-admin-button:hover {
+    background-color: #e6e6e6;
+}
+
 /* 로딩 상태 */
 body:not(.loaded) .dashboard-container {
     opacity: 0.7;

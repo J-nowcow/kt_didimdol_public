@@ -13,8 +13,16 @@
     <div class="dashboard-container">
         <!-- Hero Section -->
         <div class="hero-section">
+            <!-- Empty State: 진행 중인 인수인계서가 없는 경우 -->
+            <div class="empty-state-card" id="emptyStateCard" style="display: none;">
+                <div class="empty-state-icon">📝</div>
+                <h2 class="empty-state-title">진행 중인 인수인계서가 없습니다</h2>
+                <p class="empty-state-description">새로운 인수인계서를 작성하여 시작해보세요</p>
+                <button class="empty-state-button">새 인수인계서 작성하기</button>
+            </div>
+            
             <!-- 현재 진행 중인 인수인계서 카드 -->
-            <div class="current-handover-card">
+            <div class="current-handover-card" id="currentHandoverCard">
                 <h1 class="handover-title">수도AMI 시스템 인수인계서</h1>
                 
                 <!-- 프로그레스 바 -->
@@ -57,7 +65,15 @@
             <!-- 수집된 자료 현황 섹션 -->
             <div class="collected-materials-section">
                 <h2 class="section-title">📊 수집된 자료 현황</h2>
-                <div class="materials-grid">
+                
+                <!-- Empty State: 수집된 자료가 없는 경우 -->
+                <div class="empty-materials-state" id="emptyMaterialsState" style="display: none;">
+                    <div class="empty-materials-icon">📄</div>
+                    <p class="empty-materials-message">아직 수집된 자료가 없습니다</p>
+                    <button class="start-collection-button">자료 수집 시작하기</button>
+                </div>
+                
+                <div class="materials-grid" id="materialsGrid">
                     <div class="material-card">
                         <div class="material-title">📄 Confluence</div>
                         <div class="material-count">15건</div>
@@ -87,7 +103,16 @@
             <!-- 시스템 연결 상태 섹션 -->
             <div class="system-status-section">
                 <h2 class="section-title">시스템 연결 상태</h2>
-                <div class="system-list">
+                
+                <!-- Error State: 시스템 연결 실패 -->
+                <div class="system-error-state" id="systemErrorState" style="display: none;">
+                    <div class="error-icon">⚠️</div>
+                    <h3 class="error-title">시스템 연결 문제</h3>
+                    <p class="error-message">일부 시스템 연결에 실패했습니다</p>
+                    <button class="retry-connection-button">재연결</button>
+                </div>
+                
+                <div class="system-list" id="systemList">
                     <div class="system-item">🔗 Confluence</div>
                     <div class="system-item">🔗 Github</div>
                     <div class="system-item">🔗 Jira</div>
@@ -100,7 +125,15 @@
             <!-- 완료된 인수인계서 섹션 -->
             <div class="completed-handovers-section">
                 <h2 class="section-title">최근 완료된 인수인계서</h2>
-                <div class="completed-list">
+                
+                <!-- Empty State: 완료된 인수인계서가 없는 경우 -->
+                <div class="empty-completed-state" id="emptyCompletedState" style="display: none;">
+                    <div class="empty-completed-icon">📝</div>
+                    <p class="empty-completed-message">아직 완료된 인수인계서가 없습니다</p>
+                    <button class="first-handover-button">첫 인수인계서 작성하기</button>
+                </div>
+                
+                <div class="completed-list" id="completedList">
                     <div class="completed-card">
                         <div class="completed-title">📄 로그인 시스템</div>
                         <div class="completed-date">완료일: 2024-12-10</div>
@@ -117,6 +150,19 @@
                         <button class="view-button">보기</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Global Error State -->
+    <div class="global-error-overlay" id="globalErrorOverlay" style="display: none;">
+        <div class="error-modal">
+            <div class="error-modal-icon">❌</div>
+            <h2 class="error-modal-title">시스템 오류가 발생했습니다</h2>
+            <p class="error-modal-message">일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
+            <div class="error-modal-actions">
+                <button class="retry-button">다시 시도</button>
+                <button class="contact-admin-button">관리자 문의</button>
             </div>
         </div>
     </div>
