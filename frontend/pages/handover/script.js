@@ -13,7 +13,6 @@ let handoverData = {
 };
 let autoSaveInterval;
 let currentQuestionStep = 0;
-let isProcessingMessage = false; // 메시지 처리 중복 방지 플래그
 
 // AI 질문 플로우 (기본 정보 → 상세 내용 → 첨부 파일)
 const questionFlow = [
@@ -106,10 +105,6 @@ function setupEventListeners() {
     const chatInput = document.getElementById('chatInput');
     const sendButton = document.getElementById('sendButton');
     
-    // 기존 이벤트 리스너 제거 후 새로 등록 (중복 방지)
-    chatInput.removeEventListener('keydown', handleChatInputKeydown);
-    sendButton.removeEventListener('click', handleSendMessage);
-    
     chatInput.addEventListener('keydown', handleChatInputKeydown);
     sendButton.addEventListener('click', handleSendMessage);
     
@@ -137,7 +132,6 @@ function setupEventListeners() {
 function handleChatInputKeydown(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
-        event.stopPropagation();
         handleSendMessage();
     }
 }
@@ -147,13 +141,7 @@ function handleSendMessage() {
     const chatInput = document.getElementById('chatInput');
     const message = chatInput.value.trim();
     
-    if (!message || isProcessingMessage) return;
-    
-    // 메시지 처리 시작
-    isProcessingMessage = true;
-    
-    // 입력창 비활성화 (중복 전송 방지)
-    chatInput.disabled = true;
+    if (!message) return;
     
     // 사용자 메시지 추가
     addUserMessage(message);
@@ -165,10 +153,6 @@ function handleSendMessage() {
     // AI 응답 시뮬레이션
     setTimeout(() => {
         processUserMessage(message);
-        // 입력창 다시 활성화
-        chatInput.disabled = false;
-        chatInput.focus();
-        isProcessingMessage = false;
     }, 1000);
 }
 
