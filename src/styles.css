@@ -1,0 +1,333 @@
+/* 디딤돌 메인 대시보드 스타일 */
+
+/* 기본 설정 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #fafafa;
+    color: #333333;
+    line-height: 1.5;
+}
+
+/* 메인 컨테이너 */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 32px;
+    gap: 32px;
+}
+
+/* Hero Section */
+.hero-section {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* 현재 진행 중인 인수인계서 카드 */
+.current-handover-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid #e6e6e6;
+    position: relative;
+}
+
+.handover-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 24px;
+    line-height: 1.2;
+}
+
+/* 프로그레스 바 */
+.progress-container {
+    margin-bottom: 24px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #e6e6e6;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #e50012;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.animated {
+    animation: progressAnimation 2s ease-in-out infinite;
+}
+
+@keyframes progressAnimation {
+    0%, 100% { width: 75%; }
+    50% { width: 80%; }
+}
+
+.progress-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #999999;
+}
+
+/* 작업 계속하기 버튼 */
+.continue-button {
+    background-color: #e50012;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-bottom: 24px;
+}
+
+.continue-button:hover {
+    background-color: #cc000d;
+}
+
+/* 인수인계서 정보 */
+.handover-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.info-item {
+    font-size: 14px;
+    color: #999999;
+    font-weight: 400;
+}
+
+/* 상태 배지 */
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.status-badge.in-progress {
+    background-color: #0fba82;
+    color: #ffffff;
+}
+
+/* 새 인수인계서 작성 섹션 */
+.new-handover-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.new-handover-button {
+    width: 120px;
+    height: 120px;
+    background-color: #00c7bf;
+    border: none;
+    border-radius: 60px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-handover-button:hover {
+    background-color: #00b2ad;
+}
+
+.plus-icon {
+    font-size: 48px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.new-handover-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+}
+
+/* 수집된 자료 현황 섹션 */
+.collected-materials-section {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e6e6e6;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 16px;
+}
+
+.materials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.material-card {
+    background-color: #fafafa;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    transition: background-color 0.2s ease;
+}
+
+.material-card:hover {
+    background-color: #f2f2f2;
+}
+
+.material-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.material-count {
+    font-size: 24px;
+    font-weight: 700;
+    color: #e50012;
+}
+
+/* 사이드바 */
+.sidebar {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* 시스템 연결 상태 섹션 */
+.system-status-section {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e6e6e6;
+}
+
+.system-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.system-item {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333333;
+    padding: 8px 0;
+}
+
+/* 완료된 인수인계서 섹션 */
+.completed-handovers-section {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e6e6e6;
+}
+
+.completed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.completed-card {
+    background-color: #fafafa;
+    border-radius: 8px;
+    padding: 16px;
+    transition: background-color 0.2s ease;
+}
+
+.completed-card:hover {
+    background-color: #f2f2f2;
+}
+
+.completed-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.completed-date {
+    font-size: 14px;
+    color: #999999;
+    margin-bottom: 12px;
+}
+
+.view-button {
+    background-color: #e50012;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.view-button:hover {
+    background-color: #cc000d;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1600px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 16px;
+    }
+    
+    .hero-section {
+        padding: 16px;
+    }
+    
+    .handover-title {
+        font-size: 24px;
+    }
+    
+    .materials-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
