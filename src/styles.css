@@ -312,11 +312,30 @@ body {
     .sidebar {
         width: 100%;
     }
+    
+    .materials-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    .dashboard-container {
+        padding: 24px;
+    }
+    
+    .hero-section {
+        padding: 24px;
+    }
+    
+    .sidebar {
+        padding: 24px;
+    }
 }
 
 @media (max-width: 768px) {
     .dashboard-container {
         padding: 16px;
+        gap: 16px;
     }
     
     .hero-section {
@@ -329,5 +348,69 @@ body {
     
     .materials-grid {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
     }
+    
+    .new-handover-button {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .plus-icon {
+        font-size: 40px;
+    }
+    
+    .progress-container {
+        margin-bottom: 16px;
+    }
+    
+    .handover-info {
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        padding: 12px;
+    }
+    
+    .hero-section {
+        padding: 12px;
+    }
+    
+    .handover-title {
+        font-size: 20px;
+    }
+    
+    .materials-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .material-card {
+        padding: 12px;
+    }
+    
+    .completed-card {
+        padding: 12px;
+    }
+}
+
+/* 모바일 레이아웃 클래스 */
+.mobile-layout .dashboard-container {
+    flex-direction: column;
+}
+
+.mobile-layout .sidebar {
+    width: 100%;
+    order: -1;
+}
+
+/* 로딩 상태 */
+body:not(.loaded) .dashboard-container {
+    opacity: 0.7;
+}
+
+body.loaded .dashboard-container {
+    opacity: 1;
+    transition: opacity 0.3s ease;
 }
