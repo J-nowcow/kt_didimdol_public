@@ -201,8 +201,8 @@ function handleContinueWork(event) {
         button.style.transform = 'scale(1)';
     }, 150);
     
-    // 인수인계서 작성 페이지로 이동
-    window.location.href = '../handover/index.html';
+    // 실제 구현에서는 인수인계서 편집 페이지로 이동
+    alert('인수인계서 편집 페이지로 이동합니다. (구현 예정)');
 }
 
 // 새 인수인계서 작성 버튼 클릭 핸들러
@@ -217,8 +217,8 @@ function handleNewHandover(event) {
         button.style.transform = 'scale(1)';
     }, 150);
     
-    // 새 인수인계서 작성 페이지로 이동
-    window.location.href = '../handover/index.html';
+    // 실제 구현에서는 새 인수인계서 작성 페이지로 이동
+    alert('새 인수인계서 작성 페이지로 이동합니다. (구현 예정)');
 }
 
 // 완료된 인수인계서 보기 버튼 클릭 핸들러
