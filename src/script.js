@@ -15,103 +15,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeDashboard() {
     console.log('디딤돌 대시보드 초기화 중...');
     
-    // 예외 상황 시뮬레이션을 위한 설정
-    setupExceptionStates();
-    
     // 로딩 상태 시뮬레이션 (3초 이내 로드 요구사항)
     setTimeout(() => {
         document.body.classList.add('loaded');
         console.log('대시보드 로드 완료');
     }, 2000);
-}
-
-// 예외 상황 설정
-function setupExceptionStates() {
-    // URL 파라미터로 예외 상황 시뮬레이션
-    const urlParams = new URLSearchParams(window.location.search);
-    const exceptionType = urlParams.get('exception');
-    
-    switch(exceptionType) {
-        case 'no-handover':
-            showEmptyHandoverState();
-            break;
-        case 'no-materials':
-            showEmptyMaterialsState();
-            break;
-        case 'no-completed':
-            showEmptyCompletedState();
-            break;
-        case 'system-failure':
-            showSystemFailureState();
-            break;
-        case 'error':
-            showErrorState();
-            break;
-        default:
-            // 정상 상태 (기본값)
-            break;
-    }
-}
-
-// Empty State: 진행 중인 인수인계서가 없는 경우
-function showEmptyHandoverState() {
-    const emptyStateCard = document.getElementById('emptyStateCard');
-    const currentHandoverCard = document.getElementById('currentHandoverCard');
-    
-    if (emptyStateCard && currentHandoverCard) {
-        emptyStateCard.style.display = 'block';
-        currentHandoverCard.style.display = 'none';
-    }
-}
-
-// Empty State: 수집된 자료가 없는 경우
-function showEmptyMaterialsState() {
-    const emptyMaterialsState = document.getElementById('emptyMaterialsState');
-    const materialsGrid = document.getElementById('materialsGrid');
-    
-    if (emptyMaterialsState && materialsGrid) {
-        emptyMaterialsState.style.display = 'block';
-        materialsGrid.style.display = 'none';
-    }
-}
-
-// Empty State: 완료된 인수인계서가 없는 경우
-function showEmptyCompletedState() {
-    const emptyCompletedState = document.getElementById('emptyCompletedState');
-    const completedList = document.getElementById('completedList');
-    
-    if (emptyCompletedState && completedList) {
-        emptyCompletedState.style.display = 'block';
-        completedList.style.display = 'none';
-    }
-}
-
-// Error State: 시스템 연결 실패
-function showSystemFailureState() {
-    const systemErrorState = document.getElementById('systemErrorState');
-    const systemList = document.getElementById('systemList');
-    
-    if (systemErrorState && systemList) {
-        systemErrorState.style.display = 'block';
-        
-        // 시스템 연결 상태를 실패로 표시
-        const systemItems = systemList.querySelectorAll('.system-item');
-        systemItems.forEach((item, index) => {
-            if (index < 2) { // 처음 2개 시스템만 실패로 표시
-                item.style.color = '#cc3333';
-                item.innerHTML = `❌ ${item.textContent.replace('🔗 ', '')} 연결 실패`;
-            }
-        });
-    }
-}
-
-// Error State: 전체 시스템 오류
-function showErrorState() {
-    const globalErrorOverlay = document.getElementById('globalErrorOverlay');
-    
-    if (globalErrorOverlay) {
-        globalErrorOverlay.style.display = 'flex';
-    }
 }
 
 // 이벤트 리스너 설정
@@ -147,37 +55,6 @@ function setupEventListeners() {
         card.addEventListener('mouseenter', handleCompletedCardHover);
         card.addEventListener('mouseleave', handleCompletedCardLeave);
     });
-    
-    // 예외 상황 버튼들
-    const emptyStateButton = document.querySelector('.empty-state-button');
-    if (emptyStateButton) {
-        emptyStateButton.addEventListener('click', handleNewHandover);
-    }
-    
-    const startCollectionButton = document.querySelector('.start-collection-button');
-    if (startCollectionButton) {
-        startCollectionButton.addEventListener('click', handleStartCollection);
-    }
-    
-    const firstHandoverButton = document.querySelector('.first-handover-button');
-    if (firstHandoverButton) {
-        firstHandoverButton.addEventListener('click', handleNewHandover);
-    }
-    
-    const retryConnectionButton = document.querySelector('.retry-connection-button');
-    if (retryConnectionButton) {
-        retryConnectionButton.addEventListener('click', handleRetryConnection);
-    }
-    
-    const retryButton = document.querySelector('.retry-button');
-    if (retryButton) {
-        retryButton.addEventListener('click', handleRetrySystem);
-    }
-    
-    const contactAdminButton = document.querySelector('.contact-admin-button');
-    if (contactAdminButton) {
-        contactAdminButton.addEventListener('click', handleContactAdmin);
-    }
 }
 
 // 프로그레스 바 애니메이션 시작
@@ -201,8 +78,8 @@ function handleContinueWork(event) {
         button.style.transform = 'scale(1)';
     }, 150);
     
-    // 인수인계서 작성 페이지로 이동
-    window.location.href = '../handover/index.html';
+    // 실제 구현에서는 인수인계서 편집 페이지로 이동
+    alert('인수인계서 편집 페이지로 이동합니다. (구현 예정)');
 }
 
 // 새 인수인계서 작성 버튼 클릭 핸들러
@@ -217,8 +94,8 @@ function handleNewHandover(event) {
         button.style.transform = 'scale(1)';
     }, 150);
     
-    // 새 인수인계서 작성 페이지로 이동
-    window.location.href = '../handover/index.html';
+    // 실제 구현에서는 새 인수인계서 작성 페이지로 이동
+    alert('새 인수인계서 작성 페이지로 이동합니다. (구현 예정)');
 }
 
 // 완료된 인수인계서 보기 버튼 클릭 핸들러
@@ -355,55 +232,3 @@ window.addEventListener('resize', handleResize);
 
 // 초기 리사이즈 처리
 handleResize();
-
-// 예외 상황 버튼 핸들러들
-function handleStartCollection(event) {
-    event.preventDefault();
-    console.log('자료 수집 시작하기 클릭됨');
-    alert('자료 수집을 시작합니다. (구현 예정)');
-}
-
-function handleRetryConnection(event) {
-    event.preventDefault();
-    console.log('재연결 버튼 클릭됨');
-    
-    // 재연결 시뮬레이션
-    const systemItems = document.querySelectorAll('.system-item');
-    systemItems.forEach((item, index) => {
-        if (index < 2) {
-            item.style.color = '#0fba82';
-            item.innerHTML = `✅ ${item.textContent.replace('❌ ', '').replace(' 연결 실패', '')}`;
-        }
-    });
-    
-    // 시스템 오류 상태 숨기기
-    const systemErrorState = document.getElementById('systemErrorState');
-    if (systemErrorState) {
-        systemErrorState.style.display = 'none';
-    }
-    
-    alert('시스템 재연결을 시도합니다...');
-}
-
-function handleRetrySystem(event) {
-    event.preventDefault();
-    console.log('다시 시도 버튼 클릭됨');
-    
-    // 오류 모달 숨기기
-    const globalErrorOverlay = document.getElementById('globalErrorOverlay');
-    if (globalErrorOverlay) {
-        globalErrorOverlay.style.display = 'none';
-    }
-    
-    // 페이지 새로고침 시뮬레이션
-    alert('시스템을 다시 시도합니다...');
-    setTimeout(() => {
-        location.reload();
-    }, 1000);
-}
-
-function handleContactAdmin(event) {
-    event.preventDefault();
-    console.log('관리자 문의 버튼 클릭됨');
-    alert('관리자에게 문의합니다. (구현 예정)');
-}
