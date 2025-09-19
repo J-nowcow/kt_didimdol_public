@@ -1,4 +1,12 @@
 .bmad-core/
 
+# 환경 변수 파일들 (보안상 중요!)
+*.env
+backend/.env
+.env
+.env.local
+.env.development
+.env.production
+
 # 임시 파일들 (PR 문서 등)
 temp/
