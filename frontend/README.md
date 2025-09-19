@@ -42,11 +42,23 @@
 
 ## 파일 구조
 ```
-src/
-├── index.html          # 메인 HTML 파일
-├── styles.css          # CSS 스타일시트
-├── script.js           # JavaScript 로직
-└── README.md           # 프로젝트 문서
+frontend/
+├── pages/                      # 페이지별 파일
+│   └── dashboard/              # 메인 대시보드
+│       ├── index.html         # 대시보드 HTML
+│       ├── styles.css         # 대시보드 스타일
+│       └── script.js          # 대시보드 로직
+├── shared/                     # 공통 자원
+│   ├── styles/                # 공통 스타일
+│   │   ├── variables.css      # CSS 변수
+│   │   └── common.css         # 공통 스타일
+│   └── scripts/               # 공통 스크립트
+│       ├── utils.js           # 유틸리티 함수
+│       └── api.js             # API 통신
+├── assets/                     # 정적 자원
+│   ├── images/                # 이미지 파일
+│   └── fonts/                 # 폰트 파일
+└── README.md                  # 프로젝트 문서
 ```
 
 ## 개발 완료 사항

@@ -1,18 +1,6 @@
 /* 디딤돌 메인 대시보드 스타일 */
 
-/* 기본 설정 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #fafafa;
-    color: #333333;
-    line-height: 1.5;
-}
+/* 기본 설정은 common.css에서 상속 */
 
 /* 메인 컨테이너 */
 .dashboard-container {
@@ -20,19 +8,19 @@ body {
     min-height: 100vh;
     max-width: 1920px;
     margin: 0 auto;
-    padding: 32px;
-    gap: 32px;
+    padding: var(--spacing-xl);
+    gap: var(--spacing-xl);
 }
 
 /* Hero Section */
 .hero-section {
     flex: 1;
-    background-color: #ffffff;
-    border-radius: 16px;
-    padding: 32px;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: var(--spacing-xl);
 }
 
 /* 현재 진행 중인 인수인계서 카드 */

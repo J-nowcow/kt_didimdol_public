@@ -1,0 +1,104 @@
+/* 디딤돌 디자인 시스템 - CSS 변수 */
+
+/* 색상 팔레트 */
+:root {
+  /* 브랜드 색상 */
+  --color-primary: #e50012;
+  --color-primary-hover: #cc000d;
+  --color-secondary: #00c7bf;
+  --color-secondary-hover: #00b2ad;
+  --color-success: #0fba82;
+  --color-error: #cc3333;
+  --color-error-hover: #b30000;
+  
+  /* 중성 색상 */
+  --color-white: #ffffff;
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #f2f2f2;
+  --color-gray-300: #e6e6e6;
+  --color-gray-400: #cccccc;
+  --color-gray-500: #999999;
+  --color-gray-600: #666666;
+  --color-gray-700: #333333;
+  --color-black: #000000;
+  
+  /* 배경 색상 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #f5f5f5;
+  
+  /* 텍스트 색상 */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --text-disabled: #cccccc;
+  
+  /* 테두리 색상 */
+  --border-primary: #e6e6e6;
+  --border-secondary: #cccccc;
+  --border-error: #ffcccc;
+}
+
+/* 타이포그래피 */
+:root {
+  /* 폰트 패밀리 */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* 폰트 크기 */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+  
+  /* 폰트 두께 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* 라인 높이 */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+}
+
+/* 간격 시스템 */
+:root {
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-base: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+}
+
+/* 그림자 */
+:root {
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 테두리 반경 */
+:root {
+  --radius-sm: 4px;
+  --radius-base: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+}
+
+/* 전환 효과 */
+:root {
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
