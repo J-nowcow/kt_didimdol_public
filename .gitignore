@@ -1,1 +1,4 @@
 .bmad-core/
+
+# 임시 파일들 (PR 문서 등)
+temp/
