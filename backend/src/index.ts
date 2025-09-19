@@ -11,11 +11,13 @@ import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 import { connectDatabase } from './config/database';
 import { connectRedis } from './config/redis';
+import { connectMongoDB } from './services/MongoService';
 
 // Routes
 import handoverRoutes from './routes/handover';
 import userRoutes from './routes/user';
 import healthRoutes from './routes/health';
+import backupRoutes from './routes/backup';
 
 // Load environment variables
 dotenv.config();
@@ -55,6 +57,7 @@ app.use('/health', healthRoutes);
 // API routes
 app.use('/api/handovers', handoverRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/backup', backupRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
@@ -76,6 +79,7 @@ async function startServer() {
     // Connect to databases
     await connectDatabase();
     await connectRedis();
+    await connectMongoDB();
     
     app.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
