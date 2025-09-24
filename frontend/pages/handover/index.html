@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인수인계서 작성 - 디딤돌 (UI 중심 + Mock AI)</title>
+    <link rel="icon" href="../../assets/images/디딤돌.png" type="image/png">
+    <!-- 공통 스타일 -->
+    <link rel="stylesheet" href="../../shared/styles/variables.css">
+    <link rel="stylesheet" href="../../shared/styles/common.css">
+    <!-- 페이지별 스타일 -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="handover-container">
+        <!-- 상단 헤더 -->
+        <header class="handover-header">
+            <div class="header-left">
+                <button class="back-button" id="backButton">
+                    <span class="back-icon">←</span>
+                    <span>대시보드로 돌아가기</span>
+                </button>
+                <h1 class="page-title">인수인계서 작성</h1>
+            </div>
+            <div class="header-right">
+                <div class="save-status" id="saveStatus">
+                    <span class="save-icon">💾</span>
+                    <span class="save-text">저장됨</span>
+                    <span class="save-time" id="saveTime">방금 전</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <span class="sidebar-icon">⚙️</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <div class="main-content">
+            <!-- 좌측: AI 채팅 인터페이스 (50%) -->
+            <div class="chat-section">
+                <div class="chat-header">
+                    <div class="ai-avatar">
+                        <span class="ai-icon">🤖</span>
+                    </div>
+                    <div class="ai-info">
+                        <h3 class="ai-name">디딤돌 AI</h3>
+                        <p class="ai-status">온라인</p>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <!-- AI 환영 메시지 -->
+                    <div class="message ai-message">
+                        <div class="message-avatar">
+                            <span class="ai-icon">🤖</span>
+                        </div>
+                        <div class="message-content">
+                            <p>안녕하세요! 인수인계서 작성을 도와드리겠습니다. 먼저 기본 정보부터 알려주세요.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <div class="input-container">
+                        <textarea 
+                            class="chat-input" 
+                            id="chatInput" 
+                            placeholder="메시지를 입력하세요..."
+                            rows="1"
+                        ></textarea>
+                        <button class="send-button" id="sendButton">
+                            <span class="send-icon">📤</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우측: 인수인계서 미리보기 (50%) -->
+            <div class="preview-section">
+                <div class="preview-header">
+                    <h3 class="preview-title">인수인계서 미리보기</h3>
+                    <div class="preview-actions">
+                        <button class="export-button">📄 내보내기</button>
+                        <button class="print-button">🖨️ 인쇄</button>
+                    </div>
+                </div>
+                
+                <div class="preview-content" id="previewContent">
+                    <!-- 인수인계서 템플릿이 여기에 동적으로 생성됩니다 -->
+                    <div class="handover-document">
+                        <div class="document-header">
+                            <h1 class="document-title">인수인계서</h1>
+                            <div class="document-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">작성일:</span>
+                                    <span class="meta-value" id="documentDate">2024-12-16</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">담당자:</span>
+                                    <span class="meta-value" id="documentAuthor">김현우</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="document-body">
+                            <!-- 인수인계서 유형 선택 -->
+                            <section class="document-section" id="documentTypeSection">
+                                <h2 class="section-title">📋 인수인계서 유형</h2>
+                                <div class="section-content">
+                                    <div class="type-selector">
+                                        <label class="type-option">
+                                            <input type="radio" name="documentType" value="employee" checked>
+                                            <span class="type-label">👤 임직원 인수인계서</span>
+                                            <span class="type-description">개인의 역할과 권한 이전</span>
+                                        </label>
+                                        <label class="type-option">
+                                            <input type="radio" name="documentType" value="project">
+                                            <span class="type-label">🏗️ 프로젝트 인수인계서</span>
+                                            <span class="type-description">시스템과 기술적 요소 이전</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- 기본 정보 섹션 -->
+                            <section class="document-section" id="basicInfoSection">
+                                <h2 class="section-title">📋 기본 정보</h2>
+                                <div class="section-content">
+                                    <div class="info-item">
+                                        <label class="info-label">인수인계 대상:</label>
+                                        <span class="info-value" id="handoverTarget">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label class="info-label">업무 영역:</label>
+                                        <span class="info-value" id="workArea">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label class="info-label">인수인계 기간:</label>
+                                        <span class="info-value" id="handoverPeriod">-</span>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- 임직원 인수인계서 내용 -->
+                            <div id="employeeContent">
+                                <section class="document-section">
+                                    <h2 class="section-title">🎯 내가 하는 일과 목표</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">역할 요약</h3>
+                                            <div class="content-text" id="roleSummary">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">SLO (Service Level Objectives)</h3>
+                                            <div class="content-text" id="slo">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">👥 누가 뭘 책임지는지 (RACI 매트릭스)</h2>
+                                    <div class="section-content">
+                                        <div class="raci-matrix" id="raciMatrix">
+                                            <div class="raci-item">
+                                                <span class="raci-role">역할</span>
+                                                <span class="raci-responsibility">책임</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">🔄 반복되는 일들</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">정기 업무</h3>
+                                            <div class="content-text" id="regularTasks">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">대체인력</h3>
+                                            <div class="content-text" id="backupPersonnel">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">⚖️ 결정해야 할 일들</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">의사결정</h3>
+                                            <div class="content-text" id="decisionMaking">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">승인절차</h3>
+                                            <div class="content-text" id="approvalProcess">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">🤝 함께 일하는 사람들</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">협업 관계망</h3>
+                                            <div class="content-text" id="collaborationNetwork">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">🔐 사용 가능한 시스템들</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">접근권한</h3>
+                                            <div class="content-text" id="accessRights">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">인증</h3>
+                                            <div class="content-text" id="authentication">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <!-- 프로젝트 인수인계서 내용 -->
+                            <div id="projectContent" style="display: none;">
+                                <section class="document-section">
+                                    <h2 class="section-title">🏗️ 프로젝트 전체 모습</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">목표</h3>
+                                            <div class="content-text" id="projectGoals">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">구조</h3>
+                                            <div class="content-text" id="projectStructure">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">연결점</h3>
+                                            <div class="content-text" id="projectConnections">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">🖥️ 시스템 환경</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">개발/테스트/운영 환경</h3>
+                                            <div class="content-text" id="systemEnvironments">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">🔒 보안과 권한</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">인증체계</h3>
+                                            <div class="content-text" id="authSystem">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">로그관리</h3>
+                                            <div class="content-text" id="logManagement">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">🚀 배포와 운영</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">CI/CD</h3>
+                                            <div class="content-text" id="cicd">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">롤백 전략</h3>
+                                            <div class="content-text" id="rollbackStrategy">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">📊 모니터링과 알림</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">SLO</h3>
+                                            <div class="content-text" id="slo">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">알림정책</h3>
+                                            <div class="content-text" id="notificationPolicy">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">🛠️ 문제 해결 가이드</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">인시던트 대응</h3>
+                                            <div class="content-text" id="incidentResponse">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">💾 데이터 보호</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">백업</h3>
+                                            <div class="content-text" id="backup">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">암호화</h3>
+                                            <div class="content-text" id="encryption">-</div>
+                                        </div>
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">복구</h3>
+                                            <div class="content-text" id="recovery">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="document-section">
+                                    <h2 class="section-title">🧪 테스트와 품질</h2>
+                                    <div class="section-content">
+                                        <div class="content-item">
+                                            <h3 class="content-subtitle">품질관리 체계</h3>
+                                            <div class="content-text" id="qualityManagement">-</div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <!-- 첨부 파일 섹션 -->
+                            <section class="document-section" id="attachmentsSection">
+                                <h2 class="section-title">📎 첨부 파일</h2>
+                                <div class="section-content">
+                                    <div class="attachments-list" id="attachmentsList">
+                                        <div class="attachment-item">
+                                            <span class="attachment-icon">📄</span>
+                                            <span class="attachment-name">관련 문서</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측 사이드바 -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">상세 정보</h3>
+                <button class="sidebar-close" id="sidebarClose">×</button>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- 기본 정보 -->
+                <div class="sidebar-section">
+                    <h4 class="sidebar-section-title">📋 기본 정보</h4>
+                    <div class="sidebar-form">
+                        <div class="form-group">
+                            <label class="form-label">인수인계 대상</label>
+                            <input type="text" class="form-input" id="sidebarHandoverTarget" placeholder="이름을 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">업무 영역</label>
+                            <input type="text" class="form-input" id="sidebarWorkArea" placeholder="업무 영역을 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">인수인계 기간</label>
+                            <input type="text" class="form-input" id="sidebarHandoverPeriod" placeholder="기간을 입력하세요">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 상세 내용 -->
+                <div class="sidebar-section">
+                    <h4 class="sidebar-section-title">📝 상세 내용</h4>
+                    <div class="sidebar-form">
+                        <div class="form-group">
+                            <label class="form-label">주요 업무</label>
+                            <textarea class="form-textarea" id="sidebarMainTasks" placeholder="주요 업무를 입력하세요"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">진행 중인 프로젝트</label>
+                            <textarea class="form-textarea" id="sidebarOngoingProjects" placeholder="진행 중인 프로젝트를 입력하세요"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">주의사항</label>
+                            <textarea class="form-textarea" id="sidebarPrecautions" placeholder="주의사항을 입력하세요"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 첨부 파일 -->
+                <div class="sidebar-section">
+                    <h4 class="sidebar-section-title">📎 첨부 파일</h4>
+                    <div class="file-upload-area">
+                        <div class="upload-zone" id="uploadZone">
+                            <span class="upload-icon">📁</span>
+                            <p class="upload-text">파일을 드래그하거나 클릭하여 업로드</p>
+                        </div>
+                        <input type="file" class="file-input" id="fileInput" multiple>
+                    </div>
+                    <div class="uploaded-files" id="uploadedFiles">
+                        <!-- 업로드된 파일들이 여기에 표시됩니다 -->
+                    </div>
+                </div>
+
+                <!-- 필수 항목 체크 -->
+                <div class="sidebar-section">
+                    <h4 class="sidebar-section-title">✅ 필수 항목</h4>
+                    <div class="required-items" id="requiredItems">
+                        <div class="required-item">
+                            <span class="required-icon">❌</span>
+                            <span class="required-text">인수인계 대상</span>
+                        </div>
+                        <div class="required-item">
+                            <span class="required-icon">❌</span>
+                            <span class="required-text">업무 영역</span>
+                        </div>
+                        <div class="required-item">
+                            <span class="required-icon">❌</span>
+                            <span class="required-text">주요 업무</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">AI가 응답을 생성하고 있습니다...</p>
+    </div>
+
+    <!-- 공통 스크립트 -->
+    <script src="../../shared/scripts/utils.js"></script>
+    <script src="../../shared/scripts/api.js"></script>
+    <!-- 페이지별 스크립트 -->
+    <script src="script.js"></script>
+</body>
+</html>
