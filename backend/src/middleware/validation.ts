@@ -41,7 +41,7 @@ export const validateHandover = (req: Request, res: Response, next: NextFunction
   const { error } = handoverSchema.validate(req.body);
   
   if (error) {
-    throw new AppError(`Validation error: ${error.details[0].message}`, 400, 'VALIDATION_ERROR');
+    throw new AppError(`Validation error: ${error.details[0]?.message}`, 400, 'VALIDATION_ERROR');
   }
   
   next();

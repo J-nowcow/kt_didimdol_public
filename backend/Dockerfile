@@ -1,5 +1,10 @@
 # Dockerfile for didimdol-backend
-FROM node:18-alpine
+FROM node:18-bullseye-slim
+
+# Install runtime dependencies for Prisma (OpenSSL) and misc
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app

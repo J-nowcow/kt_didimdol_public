@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-1.1.x"]
 }
 
 datasource db {
@@ -23,7 +24,12 @@ model User {
   
   handovers   HandoverDocument[]
   comments    HandoverComment[]
-  shares      HandoverShare[]
+  // Versions created by this user
+  versions    HandoverVersion[] @relation("VersionCreator")
+  // Shares user has created (shared to others)
+  shares      HandoverShare[] @relation("SharedBy")
+  // Shares user received from others
+  sharesReceived HandoverShare[] @relation("SharedWith")
   
   @@map("users")
 }
@@ -60,7 +66,7 @@ model HandoverVersion {
   changeSummary String?
   
   document      HandoverDocument @relation(fields: [documentId], references: [id])
-  creator       User             @relation(fields: [createdBy], references: [id])
+  creator       User             @relation("VersionCreator", fields: [createdBy], references: [id])
   
   @@map("handover_versions")
 }
@@ -75,8 +81,8 @@ model HandoverShare {
   expiresAt         DateTime?
   
   document          HandoverDocument @relation(fields: [documentId], references: [id])
-  sharedWithUser    User             @relation(fields: [sharedWithUserId], references: [id])
-  sharer            User             @relation(fields: [sharedBy], references: [id])
+  sharedWithUser    User             @relation("SharedWith", fields: [sharedWithUserId], references: [id])
+  sharer            User             @relation("SharedBy", fields: [sharedBy], references: [id])
   
   @@map("handover_shares")
 }

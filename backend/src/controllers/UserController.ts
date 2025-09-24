@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { UserService } from '../services/UserService';
 import { AuthRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
+import { requireUserId } from '../utils/auth';
 
 export class UserController {
   private userService: UserService;
@@ -34,7 +35,7 @@ export class UserController {
   // Get user by ID
   public getUserById = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const user = await this.userService.getUserById(parseInt(id));
 
       if (!user) {
@@ -54,8 +55,8 @@ export class UserController {
   // Update user
   public updateUser = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const user = await this.userService.updateUser(parseInt(id), req.body, req.user!.id);
+      const { id } = req.params as { id: string };
+      const user = await this.userService.updateUser(parseInt(id), req.body, requireUserId(req));
 
       if (!user) {
         throw new AppError('User not found', 404, 'NOT_FOUND');
@@ -74,8 +75,8 @@ export class UserController {
   // Get user's handovers
   public getUserHandovers = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const { page = 1, limit = 10, status } = req.query;
+      const { id } = req.params as { id: string };
+      const { page = 1, limit = 10, status } = req.query as { page?: string | number; limit?: string | number; status?: string };
       
       const handovers = await this.userService.getUserHandovers(parseInt(id), {
         page: parseInt(page as string),

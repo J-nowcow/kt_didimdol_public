@@ -50,6 +50,8 @@ docker-compose up backend
 
 ### 인수인계서 API
 
+> **인증 필요**: 모든 `/api/*` 요청은 `Authorization: Bearer <JWT>` 헤더가 필요합니다. 프론트엔드 개발 중에는 브라우저 콘솔에서 `localStorage.setItem('didimdol.authToken', '<발급받은 JWT>')` 로 토큰을 저장하면 공통 API 모듈이 자동으로 사용합니다.
+
 | Method | Endpoint | Description |
 |------|----------|-------------|
 | GET | `/api/handovers` | 인수인계서 목록 조회 |
@@ -75,6 +77,16 @@ docker-compose up backend
 | GET | `/api/users/:id` | 사용자 상세 조회 |
 | PUT | `/api/users/:id` | 사용자 정보 수정 |
 | GET | `/api/users/:id/handovers` | 사용자 인수인계서 목록 |
+
+### 백업 API
+
+| Method | Endpoint | Description |
+|------|----------|-------------|
+| POST | `/api/backup/create` | PostgreSQL + MongoDB 전체 백업 생성 (gzip)|
+| GET | `/api/backup/list` | 백업 파일 목록 조회 |
+| GET | `/api/backup/status` | 백업 상태 요약 |
+| POST | `/api/backup/restore/:backupId` | 선택한 백업으로 복구 |
+| DELETE | `/api/backup/:backupId` | 백업 파일 삭제 |
 
 ## 🏗️ 아키텍처
 

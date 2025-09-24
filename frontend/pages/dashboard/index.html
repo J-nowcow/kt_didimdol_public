@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>디딤돌 - 인수인계 관리 시스템</title>
+    <link rel="icon" href="../../assets/images/디딤돌.png" type="image/png">
     <!-- 공통 스타일 -->
     <link rel="stylesheet" href="../../shared/styles/variables.css">
     <link rel="stylesheet" href="../../shared/styles/common.css">
@@ -56,6 +57,37 @@
                     <div class="progress-bar">
                         <div class="progress-fill animated" style="width: 75%"></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- 인수인계서 검색 및 목록 -->
+            <div class="handover-search-section">
+                <div class="handover-toolbar">
+                    <input type="text" id="handoverSearchInput" class="handover-search-input" placeholder="인수인계서 제목으로 검색" />
+                    <select id="handoverStatusFilter" class="handover-filter">
+                        <option value="">전체 상태</option>
+                        <option value="draft">초안</option>
+                        <option value="in_progress">진행 중</option>
+                        <option value="completed">완료</option>
+                        <option value="archived">보관</option>
+                    </select>
+                    <select id="handoverSortFilter" class="handover-filter">
+                        <option value="createdAt_desc">최신순</option>
+                        <option value="createdAt_asc">오래된순</option>
+                        <option value="updatedAt_desc">최근 업데이트순</option>
+                        <option value="updatedAt_asc">이전 업데이트순</option>
+                    </select>
+                    <button id="handoverSearchButton" class="handover-search-button">검색</button>
+                </div>
+
+                <div class="handover-results" id="handoverResults">
+                    <!-- 검색 결과가 동적으로 표시됩니다 -->
+                </div>
+
+                <div class="handover-pagination" id="handoverPagination">
+                    <button class="pagination-button" data-direction="prev">이전</button>
+                    <span class="pagination-info">1 / 1 페이지</span>
+                    <button class="pagination-button" data-direction="next">다음</button>
                 </div>
             </div>
             

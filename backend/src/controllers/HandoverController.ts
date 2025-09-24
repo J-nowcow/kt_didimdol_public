@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { HandoverService } from '../services/HandoverService';
 import { AuthRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
+import { requireUserId } from '../utils/auth';
 
 export class HandoverController {
   private handoverService: HandoverService;
@@ -22,7 +23,7 @@ export class HandoverController {
         search: search as string,
         sortBy: sortBy as string,
         sortOrder: sortOrder as string,
-        userId: req.user!.id
+        userId: process.env.NODE_ENV === 'development' ? 1 : requireUserId(req)
       });
 
       res.json({
@@ -37,9 +38,11 @@ export class HandoverController {
   // Create new handover
   public createHandover = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      // 개발 환경에서도 실제 데이터베이스에 저장
+
       const handoverData = {
         ...req.body,
-        authorId: req.user!.id
+        authorId: process.env.NODE_ENV === 'development' ? 1 : requireUserId(req)
       };
 
       const handover = await this.handoverService.createHandover(handoverData);
@@ -49,15 +52,19 @@ export class HandoverController {
         data: handover
       });
     } catch (error) {
-      throw new AppError('Failed to create handover', 500, 'CREATE_ERROR');
+      console.error('Create handover error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new AppError(`Failed to create handover: ${errorMessage}`, 500, 'CREATE_ERROR');
     }
   };
 
   // Get handover by ID
   public getHandoverById = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const handover = await this.handoverService.getHandoverById(parseInt(id), req.user!.id);
+      const { id } = req.params as { id: string };
+      
+      const userId = requireUserId(req);
+      const handover = await this.handoverService.getHandoverById(parseInt(id), userId);
 
       if (!handover) {
         throw new AppError('Handover not found', 404, 'NOT_FOUND');
@@ -76,8 +83,10 @@ export class HandoverController {
   // Update handover
   public updateHandover = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const handover = await this.handoverService.updateHandover(parseInt(id), req.body, req.user!.id);
+      const { id } = req.params as { id: string };
+      
+      const userId = requireUserId(req);
+      const handover = await this.handoverService.updateHandover(parseInt(id), req.body, userId);
 
       if (!handover) {
         throw new AppError('Handover not found', 404, 'NOT_FOUND');
@@ -96,8 +105,8 @@ export class HandoverController {
   // Delete handover
   public deleteHandover = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const success = await this.handoverService.deleteHandover(parseInt(id), req.user!.id);
+      const { id } = req.params as { id: string };
+      const success = await this.handoverService.deleteHandover(parseInt(id), requireUserId(req));
 
       if (!success) {
         throw new AppError('Handover not found', 404, 'NOT_FOUND');
@@ -116,10 +125,10 @@ export class HandoverController {
   // Create version
   public createVersion = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const { changeSummary } = req.body;
+      const { id } = req.params as { id: string };
+      const { changeSummary } = req.body as { changeSummary?: string };
       
-      const version = await this.handoverService.createVersion(parseInt(id), changeSummary, req.user!.id);
+      const version = await this.handoverService.createVersion(parseInt(id), (changeSummary as string), requireUserId(req));
 
       res.status(201).json({
         success: true,
@@ -133,8 +142,8 @@ export class HandoverController {
   // Get versions
   public getVersions = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const versions = await this.handoverService.getVersions(parseInt(id), req.user!.id);
+      const { id } = req.params as { id: string };
+      const versions = await this.handoverService.getVersions(parseInt(id), requireUserId(req));
 
       res.json({
         success: true,
@@ -148,15 +157,15 @@ export class HandoverController {
   // Share handover
   public shareHandover = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const { sharedWithUserId, permissionLevel, expiresAt } = req.body;
+      const { id } = req.params as { id: string };
+      const { sharedWithUserId, permissionLevel, expiresAt } = req.body as { sharedWithUserId: number; permissionLevel: string; expiresAt?: string };
       
       const share = await this.handoverService.shareHandover(
         parseInt(id),
-        sharedWithUserId,
-        permissionLevel,
-        req.user!.id,
-        expiresAt
+        Number(sharedWithUserId),
+        String(permissionLevel),
+        requireUserId(req),
+        expiresAt ? new Date(expiresAt) : undefined
       );
 
       res.status(201).json({
@@ -171,8 +180,8 @@ export class HandoverController {
   // Get shares
   public getShares = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const shares = await this.handoverService.getShares(parseInt(id), req.user!.id);
+      const { id } = req.params as { id: string };
+      const shares = await this.handoverService.getShares(parseInt(id), requireUserId(req));
 
       res.json({
         success: true,
@@ -186,8 +195,8 @@ export class HandoverController {
   // Delete share
   public deleteShare = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id, shareId } = req.params;
-      const success = await this.handoverService.deleteShare(parseInt(id), parseInt(shareId), req.user!.id);
+      const { id, shareId } = req.params as { id: string; shareId: string };
+      const success = await this.handoverService.deleteShare(parseInt(id), parseInt(shareId), requireUserId(req));
 
       if (!success) {
         throw new AppError('Share not found', 404, 'NOT_FOUND');
@@ -206,8 +215,8 @@ export class HandoverController {
   // Get comments
   public getComments = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const comments = await this.handoverService.getComments(parseInt(id), req.user!.id);
+      const { id } = req.params as { id: string };
+      const comments = await this.handoverService.getComments(parseInt(id), requireUserId(req));
 
       res.json({
         success: true,
@@ -221,14 +230,14 @@ export class HandoverController {
   // Create comment
   public createComment = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const { content, parentCommentId } = req.body;
+      const { id } = req.params as { id: string };
+      const { content, parentCommentId } = req.body as { content?: string; parentCommentId?: number };
       
       const comment = await this.handoverService.createComment(
         parseInt(id),
-        content,
-        req.user!.id,
-        parentCommentId
+        String(content as string),
+        requireUserId(req),
+        typeof parentCommentId === 'number' ? parentCommentId : undefined
       );
 
       res.status(201).json({
@@ -243,10 +252,10 @@ export class HandoverController {
   // Update comment
   public updateComment = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { commentId } = req.params;
-      const { content } = req.body;
+      const { commentId } = req.params as { commentId: string };
+      const { content } = req.body as { content?: string };
       
-      const comment = await this.handoverService.updateComment(parseInt(commentId), content, req.user!.id);
+      const comment = await this.handoverService.updateComment(parseInt(commentId), String(content as string), requireUserId(req));
 
       if (!comment) {
         throw new AppError('Comment not found', 404, 'NOT_FOUND');
@@ -265,8 +274,8 @@ export class HandoverController {
   // Delete comment
   public deleteComment = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { commentId } = req.params;
-      const success = await this.handoverService.deleteComment(parseInt(commentId), req.user!.id);
+      const { commentId } = req.params as { commentId: string };
+      const success = await this.handoverService.deleteComment(parseInt(commentId), requireUserId(req));
 
       if (!success) {
         throw new AppError('Comment not found', 404, 'NOT_FOUND');
