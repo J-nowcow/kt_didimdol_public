@@ -359,8 +359,12 @@ function setupEventListeners() {
 
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarClose = document.getElementById('sidebarClose');
+    const completeButton = document.getElementById('completeButton');
     sidebarToggle.addEventListener('click', toggleSidebar);
     sidebarClose.addEventListener('click', closeSidebar);
+    if (completeButton) {
+        completeButton.addEventListener('click', handleCompleteFromEditor);
+    }
 
     // 뒤로가기 버튼 이벤트 리스너 추가
     const backButton = document.getElementById('backButton');
@@ -836,3 +840,26 @@ function goBack() {
 }
 
 // goBack 함수는 이벤트 리스너로 처리하므로 전역 할당 불필요
+
+async function handleCompleteFromEditor() {
+    if (!currentHandoverId) {
+        alert('완료 처리할 인수인계서가 없습니다.');
+        return;
+    }
+    if (!confirm('이 인수인계서를 완료 처리하시겠습니까? 완료 후에도 언제든지 다시 수정할 수 있습니다.')) {
+        return;
+    }
+    try {
+        if (!HandoverService) {
+            throw new Error('HandoverAPI가 초기화되지 않았습니다.');
+        }
+        const payload = buildHandoverPayload();
+        payload.status = 'completed';
+        await HandoverService.update(currentHandoverId, payload);
+        updateSaveStatus('완료됨', '방금 전');
+        alert('인수인계서가 완료 처리되었습니다.');
+    } catch (error) {
+        const message = DidimdolAPI.ErrorHandler ? DidimdolAPI.ErrorHandler.getErrorMessage(error) : error.message;
+        alert(`완료 처리 실패: ${message}`);
+    }
+}

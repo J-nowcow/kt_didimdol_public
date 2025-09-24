@@ -3,16 +3,8 @@
 ## Description
 PR 양식 템플릿을 생성합니다.
 
-## Command
-```bash
-cat .cursor/pr-template.md
-```
-
-## Usage
-1. 커서에서 `Cmd+Shift+P` (또는 `Ctrl+Shift+P`)
-2. "Cursor: Run Command" 입력
-3. "PR Template" 선택
-4. 터미널에서 템플릿 내용 확인
+## Template Title
+(예시) feat: 메인 대시보드 UI 구축 (Story #001)
 
 ## Template Content
 ```markdown
