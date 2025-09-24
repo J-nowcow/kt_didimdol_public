@@ -19,11 +19,10 @@
 
 ## 🛠️ 기술 스택
 
-- **Backend**: Node.js, Python, PostgreSQL, MongoDB, Redis
+- **Backend**: Node.js, Python, PostgreSQL, Redis
 - **Frontend**: React, TypeScript, Tailwind CSS
 - **AI/ML**: OpenAI, Azure AI, MCP
 - **Infrastructure**: Azure, AKS, Kubernetes
-- **Database**: PostgreSQL (메타데이터), MongoDB (문서 데이터)
 
 ## 📚 자세한 내용
 
