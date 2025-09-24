@@ -1,160 +1,146 @@
-import { prisma } from '../config/database';
-import { MongoService } from './MongoService';
-import { logger } from '../utils/logger';
 import fs from 'fs/promises';
 import path from 'path';
-import { createReadStream, createWriteStream } from 'fs';
-import { pipeline } from 'stream/promises';
-import { gzip, gunzip } from 'zlib';
+import { gzipSync, gunzipSync } from 'zlib';
+import { Types } from 'mongoose';
+
+import { prisma } from '../config/database';
+import { logger } from '../utils/logger';
+
+interface PostgresSnapshot {
+  users: any[];
+  handoverDocuments: any[];
+  handoverVersions: any[];
+  handoverShares: any[];
+  handoverComments: any[];
+}
+
+interface MongoSnapshot {
+  handovercontents: any[];
+  handovertemplates: any[];
+}
+
+interface BackupSnapshot {
+  metadata: {
+    backupId: string;
+    createdAt: string;
+    version: string;
+  };
+  postgres: PostgresSnapshot;
+  mongo: MongoSnapshot;
+}
 
 export class BackupService {
-  private mongoService: MongoService;
   private backupDir: string;
 
   constructor() {
-    this.mongoService = new MongoService();
-    this.backupDir = process.env.BACKUP_DIR || './backups';
+    const defaultDir = path.resolve(process.cwd(), 'backups');
+    this.backupDir = process.env.BACKUP_DIR || defaultDir;
   }
 
-  // 전체 데이터베이스 백업
   async createFullBackup(): Promise<string> {
-    try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const backupId = `backup_${timestamp}`;
-      const backupPath = path.join(this.backupDir, backupId);
+    await fs.mkdir(this.backupDir, { recursive: true });
 
-      // 백업 디렉토리 생성
-      await fs.mkdir(backupPath, { recursive: true });
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupId = `backup_${timestamp}`;
+    const backupFile = path.join(this.backupDir, `${backupId}.json.gz`);
 
-      logger.info(`Starting full backup: ${backupId}`);
+    logger.info(`Starting full backup: ${backupId}`);
 
-      // 1. PostgreSQL 데이터 백업
-      const postgresBackup = await this.backupPostgreSQL(backupPath);
-      logger.info('PostgreSQL backup completed');
+    const snapshot = await this.buildSnapshot(backupId);
+    const compressed = gzipSync(Buffer.from(JSON.stringify(snapshot, null, 2)));
+    await fs.writeFile(backupFile, compressed);
 
-      // 2. MongoDB 데이터 백업
-      const mongoBackup = await this.backupMongoDB(backupPath);
-      logger.info('MongoDB backup completed');
+    logger.info(`✅ Full backup completed: ${backupId}`);
+    return backupId;
+  }
 
-      // 3. 백업 메타데이터 생성
-      const metadata = {
+  private async buildSnapshot(backupId: string): Promise<BackupSnapshot> {
+    const [postgres, mongo] = await Promise.all([
+      this.buildPostgresSnapshot(),
+      this.buildMongoSnapshot()
+    ]);
+
+    return {
+      metadata: {
         backupId,
-        timestamp: new Date().toISOString(),
-        postgresBackup,
-        mongoBackup,
-        status: 'completed'
-      };
-
-      await fs.writeFile(
-        path.join(backupPath, 'metadata.json'),
-        JSON.stringify(metadata, null, 2)
-      );
-
-      // 4. 백업 압축
-      const compressedPath = await this.compressBackup(backupPath);
-      logger.info(`Backup compressed: ${compressedPath}`);
-
-      logger.info(`✅ Full backup completed: ${backupId}`);
-      return backupId;
-
-    } catch (error) {
-      logger.error('❌ Full backup failed:', error);
-      throw error;
-    }
+        createdAt: new Date().toISOString(),
+        version: '1.0.0'
+      },
+      postgres,
+      mongo
+    };
   }
 
-  // PostgreSQL 데이터 백업
-  private async backupPostgreSQL(backupPath: string): Promise<string> {
-    const postgresBackupPath = path.join(backupPath, 'postgres_backup.json');
-    
-    // 사용자 데이터 백업
-    const users = await prisma.user.findMany();
-    await fs.writeFile(
-      path.join(backupPath, 'users.json'),
-      JSON.stringify(users, null, 2)
-    );
+  private async buildPostgresSnapshot(): Promise<PostgresSnapshot> {
+    const [
+      users,
+      handoverDocuments,
+      handoverVersions,
+      handoverShares,
+      handoverComments
+    ] = await Promise.all([
+      prisma.user.findMany(),
+      prisma.handoverDocument.findMany(),
+      prisma.handoverVersion.findMany(),
+      prisma.handoverShare.findMany(),
+      prisma.handoverComment.findMany()
+    ]);
 
-    // 인수인계서 메타데이터 백업
-    const handovers = await prisma.handoverDocument.findMany({
-      include: {
-        author: true,
-        versions: true,
-        shares: true,
-        comments: true
-      }
-    });
-    await fs.writeFile(
-      path.join(backupPath, 'handovers.json'),
-      JSON.stringify(handovers, null, 2)
-    );
-
-    return postgresBackupPath;
+    return {
+      users,
+      handoverDocuments,
+      handoverVersions,
+      handoverShares,
+      handoverComments
+    };
   }
 
-  // MongoDB 데이터 백업
-  private async backupMongoDB(backupPath: string): Promise<string> {
-    const mongoBackupPath = path.join(backupPath, 'mongodb_backup.json');
-    
-    // MongoDB 연결 및 데이터 추출
+  private async buildMongoSnapshot(): Promise<MongoSnapshot> {
     const mongoose = require('mongoose');
-    const db = mongoose.connection.db;
-    
-    const collections = ['handovercontents', 'handovertemplates'];
-    const mongoData: any = {};
+    const connection = mongoose.connection;
 
-    for (const collectionName of collections) {
+    if (!connection || connection.readyState !== 1) {
+      logger.warn('MongoDB connection is not ready. Skipping Mongo snapshot.');
+      return { handovercontents: [], handovertemplates: [] };
+    }
+
+    const fetchCollection = async (name: string) => {
       try {
-        const collection = db.collection(collectionName);
-        const data = await collection.find({}).toArray();
-        mongoData[collectionName] = data;
+        const docs = await connection.db.collection(name).find({}).toArray();
+        return docs.map((doc: any) => serializeForBackup(doc));
       } catch (error) {
-        logger.warn(`Failed to backup collection ${collectionName}:`, error);
+        logger.warn(`Failed to snapshot Mongo collection ${name}:`, error);
+        return [];
       }
-    }
+    };
 
-    await fs.writeFile(mongoBackupPath, JSON.stringify(mongoData, null, 2));
-    return mongoBackupPath;
+    const [handovercontents, handovertemplates] = await Promise.all([
+      fetchCollection('handovercontents'),
+      fetchCollection('handovertemplates')
+    ]);
+
+    return { handovercontents, handovertemplates };
   }
 
-  // 백업 압축
-  private async compressBackup(backupPath: string): Promise<string> {
-    const compressedPath = `${backupPath}.tar.gz`;
-    
-    // 간단한 gzip 압축 (실제로는 tar+gzip 사용 권장)
-    const files = await fs.readdir(backupPath);
-    const compressedData: any = {};
-
-    for (const file of files) {
-      if (file !== 'metadata.json') {
-        const filePath = path.join(backupPath, file);
-        const content = await fs.readFile(filePath, 'utf8');
-        compressedData[file] = content;
-      }
-    }
-
-    await fs.writeFile(compressedPath, JSON.stringify(compressedData, null, 2));
-    return compressedPath;
-  }
-
-  // 백업 목록 조회
   async getBackupList(): Promise<any[]> {
+    await fs.mkdir(this.backupDir, { recursive: true });
+
     try {
-      const backups = [];
       const files = await fs.readdir(this.backupDir);
+      const backups = [] as any[];
 
       for (const file of files) {
-        if (file.startsWith('backup_') && file.endsWith('.tar.gz')) {
-          const backupPath = path.join(this.backupDir, file);
-          const stats = await fs.stat(backupPath);
-          
-          backups.push({
-            id: file.replace('.tar.gz', ''),
-            filename: file,
-            size: stats.size,
-            createdAt: stats.birthtime,
-            modifiedAt: stats.mtime
-          });
-        }
+        if (!file.startsWith('backup_') || !file.endsWith('.json.gz')) continue;
+        const filePath = path.join(this.backupDir, file);
+        const stats = await fs.stat(filePath);
+
+        backups.push({
+          id: file.replace('.json.gz', ''),
+          filename: file,
+          size: stats.size,
+          createdAt: stats.birthtime,
+          modifiedAt: stats.mtime
+        });
       }
 
       return backups.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -164,66 +150,80 @@ export class BackupService {
     }
   }
 
-  // 백업에서 복구
   async restoreFromBackup(backupId: string): Promise<boolean> {
+    const backupFile = path.join(this.backupDir, `${backupId}.json.gz`);
+
     try {
-      const backupPath = path.join(this.backupDir, `${backupId}.tar.gz`);
-      
-      // 백업 파일 존재 확인
-      try {
-        await fs.access(backupPath);
-      } catch {
-        throw new Error(`Backup not found: ${backupId}`);
-      }
+      await fs.access(backupFile);
+    } catch {
+      throw new Error(`Backup not found: ${backupId}`);
+    }
 
-      logger.info(`Starting restore from backup: ${backupId}`);
+    logger.info(`Starting restore from backup: ${backupId}`);
 
-      // 1. 백업 데이터 로드
-      const backupData = JSON.parse(await fs.readFile(backupPath, 'utf8'));
+    try {
+      const compressed = await fs.readFile(backupFile);
+      const snapshot = JSON.parse(gunzipSync(compressed).toString()) as BackupSnapshot;
 
-      // 2. PostgreSQL 데이터 복구
-      if (backupData.users) {
-        await this.restorePostgreSQL(backupData);
-      }
-
-      // 3. MongoDB 데이터 복구
-      if (backupData.handovercontents || backupData.handovertemplates) {
-        await this.restoreMongoDB(backupData);
-      }
+      await this.restorePostgres(snapshot.postgres);
+      await this.restoreMongo(snapshot.mongo);
 
       logger.info(`✅ Restore completed from backup: ${backupId}`);
       return true;
-
     } catch (error) {
       logger.error('❌ Restore failed:', error);
       throw error;
     }
   }
 
-  // PostgreSQL 데이터 복구
-  private async restorePostgreSQL(backupData: any): Promise<void> {
+  private async restorePostgres(data: PostgresSnapshot): Promise<void> {
     try {
-      // 사용자 데이터 복구
-      if (backupData.users) {
-        for (const user of backupData.users) {
-          await prisma.user.upsert({
-            where: { id: user.id },
-            update: user,
+      await prisma.$transaction(async (tx) => {
+        for (const user of data.users) {
+          const { id, ...rest } = user;
+          await tx.user.upsert({
+            where: { id },
+            update: removeKeys(rest, ['createdAt', 'updatedAt']),
             create: user
           });
         }
-      }
 
-      // 인수인계서 데이터 복구
-      if (backupData.handovers) {
-        for (const handover of backupData.handovers) {
-          await prisma.handoverDocument.upsert({
-            where: { id: handover.id },
-            update: handover,
-            create: handover
+        for (const document of data.handoverDocuments) {
+          const { id, ...rest } = document;
+          await tx.handoverDocument.upsert({
+            where: { id },
+            update: removeKeys(rest, ['createdAt', 'updatedAt']),
+            create: document
           });
         }
-      }
+
+        for (const version of data.handoverVersions) {
+          const { id, ...rest } = version;
+          await tx.handoverVersion.upsert({
+            where: { id },
+            update: removeKeys(rest, ['createdAt']),
+            create: version
+          });
+        }
+
+        for (const share of data.handoverShares) {
+          const { id, ...rest } = share;
+          await tx.handoverShare.upsert({
+            where: { id },
+            update: removeKeys(rest, ['sharedAt']),
+            create: share
+          });
+        }
+
+        for (const comment of data.handoverComments) {
+          const { id, ...rest } = comment;
+          await tx.handoverComment.upsert({
+            where: { id },
+            update: removeKeys(rest, ['createdAt', 'updatedAt']),
+            create: comment
+          });
+        }
+      });
 
       logger.info('PostgreSQL data restored');
     } catch (error) {
@@ -232,39 +232,40 @@ export class BackupService {
     }
   }
 
-  // MongoDB 데이터 복구
-  private async restoreMongoDB(backupData: any): Promise<void> {
+  private async restoreMongo(data: MongoSnapshot): Promise<void> {
+    const mongoose = require('mongoose');
+    const connection = mongoose.connection;
+
+    if (!connection || connection.readyState !== 1) {
+      logger.warn('MongoDB connection is not ready. Skipping Mongo restore.');
+      return;
+    }
+
+    const restoreCollection = async (name: string, docs: any[]) => {
+      const collection = connection.db.collection(name);
+      await collection.deleteMany({});
+
+      if (!docs.length) return;
+
+      const payload = docs.map((doc) => hydrateMongoDocument(doc));
+      await collection.insertMany(payload, { ordered: true });
+    };
+
     try {
-      const mongoose = require('mongoose');
-      const db = mongoose.connection.db;
-
-      // 컬렉션별 데이터 복구
-      for (const [collectionName, data] of Object.entries(backupData)) {
-        if (Array.isArray(data)) {
-          const collection = db.collection(collectionName);
-          
-          // 기존 데이터 삭제 (주의: 프로덕션에서는 더 안전한 방법 사용)
-          await collection.deleteMany({});
-          
-          // 새 데이터 삽입
-          if (data.length > 0) {
-            await collection.insertMany(data);
-          }
-        }
-      }
-
+      await restoreCollection('handovercontents', data.handovercontents || []);
+      await restoreCollection('handovertemplates', data.handovertemplates || []);
       logger.info('MongoDB data restored');
     } catch (error) {
       logger.error('Failed to restore MongoDB data:', error);
       throw error;
     }
-  }
+}
 
-  // 백업 삭제
-  async deleteBackup(backupId: string): Promise<boolean> {
+async deleteBackup(backupId: string): Promise<boolean> {
+    const backupFile = path.join(this.backupDir, `${backupId}.json.gz`);
+
     try {
-      const backupPath = path.join(this.backupDir, `${backupId}.tar.gz`);
-      await fs.unlink(backupPath);
+      await fs.unlink(backupFile);
       logger.info(`Backup deleted: ${backupId}`);
       return true;
     } catch (error) {
@@ -273,12 +274,11 @@ export class BackupService {
     }
   }
 
-  // 백업 상태 확인
   async getBackupStatus(): Promise<any> {
     try {
       const backups = await this.getBackupList();
       const totalSize = backups.reduce((sum, backup) => sum + backup.size, 0);
-      
+
       return {
         totalBackups: backups.length,
         totalSize,
@@ -294,5 +294,73 @@ export class BackupService {
         backupDir: this.backupDir
       };
     }
+}
+}
+
+function removeKeys<T extends Record<string, any>>(source: T, keys: string[]): Partial<T> {
+  const clone: Record<string, any> = { ...source };
+  for (const key of keys) {
+    if (key in clone) {
+      delete clone[key];
+    }
   }
+  return clone as Partial<T>;
+}
+
+function serializeForBackup(value: any): any {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (value && typeof value === 'object') {
+    if (typeof value.toHexString === 'function') {
+      return value.toHexString();
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((entry) => serializeForBackup(entry));
+    }
+
+    const serialized: Record<string, any> = {};
+    for (const [key, nested] of Object.entries(value)) {
+      serialized[key] = serializeForBackup(nested);
+    }
+    return serialized;
+  }
+
+  return value;
+}
+
+function hydrateMongoDocument(doc: any): any {
+  if (!doc || typeof doc !== 'object') {
+    return doc;
+  }
+
+  const hydrated: Record<string, any> = {};
+  for (const [key, value] of Object.entries(doc)) {
+    if (key === '_id' && typeof value === 'string') {
+      hydrated._id = new Types.ObjectId(value);
+      continue;
+    }
+
+    if (typeof value === 'string' && key.endsWith('At')) {
+      const parsed = new Date(value);
+      hydrated[key] = Number.isNaN(parsed.getTime()) ? value : parsed;
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      hydrated[key] = value.map((item) => hydrateMongoDocument(item));
+      continue;
+    }
+
+    if (value && typeof value === 'object') {
+      hydrated[key] = hydrateMongoDocument(value);
+      continue;
+    }
+
+    hydrated[key] = value;
+  }
+
+  return hydrated;
 }

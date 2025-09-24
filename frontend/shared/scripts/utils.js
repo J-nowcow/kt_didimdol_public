@@ -188,6 +188,16 @@ function setUrlParam(name, value) {
  * @returns {string}
  */
 function formatDate(date = new Date()) {
+    // 문자열인 경우 Date 객체로 변환
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+    
+    // Date 객체가 유효한지 확인
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+        return '날짜 없음';
+    }
+    
     return date.toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: '2-digit',

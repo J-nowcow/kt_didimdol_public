@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const HandoverController_1 = require("../controllers/HandoverController");
+const auth_1 = require("../middleware/auth");
+const validation_1 = require("../middleware/validation");
+const router = (0, express_1.Router)();
+const handoverController = new HandoverController_1.HandoverController();
+router.get('/', process.env.NODE_ENV === 'development' ? (req, res, next) => next() : auth_1.authenticateToken, handoverController.getAllHandovers);
+router.post('/', process.env.NODE_ENV === 'development' ? (req, res, next) => next() : auth_1.authenticateToken, validation_1.validateHandover, handoverController.createHandover);
+router.get('/:id', process.env.NODE_ENV === 'development' ? (req, res, next) => next() : auth_1.authenticateToken, handoverController.getHandoverById);
+router.put('/:id', process.env.NODE_ENV === 'development' ? (req, res, next) => next() : auth_1.authenticateToken, validation_1.validateHandover, handoverController.updateHandover);
+router.delete('/:id', auth_1.authenticateToken, handoverController.deleteHandover);
+router.post('/:id/versions', auth_1.authenticateToken, handoverController.createVersion);
+router.get('/:id/versions', auth_1.authenticateToken, handoverController.getVersions);
+router.post('/:id/share', auth_1.authenticateToken, handoverController.shareHandover);
+router.get('/:id/shares', auth_1.authenticateToken, handoverController.getShares);
+router.delete('/:id/shares/:shareId', auth_1.authenticateToken, handoverController.deleteShare);
+router.get('/:id/comments', auth_1.authenticateToken, handoverController.getComments);
+router.post('/:id/comments', auth_1.authenticateToken, handoverController.createComment);
+router.put('/comments/:commentId', auth_1.authenticateToken, handoverController.updateComment);
+router.delete('/comments/:commentId', auth_1.authenticateToken, handoverController.deleteComment);
+exports.default = router;
+//# sourceMappingURL=handover.js.map

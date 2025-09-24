@@ -54,7 +54,7 @@ router.get('/status', authenticateToken, async (req, res) => {
 // 백업에서 복구
 router.post('/restore/:backupId', authenticateToken, async (req, res) => {
   try {
-    const { backupId } = req.params;
+    const { backupId } = req.params as { backupId: string };
     const success = await backupService.restoreFromBackup(backupId);
     
     if (!success) {
@@ -74,7 +74,7 @@ router.post('/restore/:backupId', authenticateToken, async (req, res) => {
 // 백업 삭제
 router.delete('/:backupId', authenticateToken, async (req, res) => {
   try {
-    const { backupId } = req.params;
+    const { backupId } = req.params as { backupId: string };
     const success = await backupService.deleteBackup(backupId);
     
     if (!success) {

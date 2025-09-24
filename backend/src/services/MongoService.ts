@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 import { logger } from '../utils/logger';
 
 // MongoDB 연결
@@ -49,13 +49,7 @@ const HandoverContentSchema = new Schema<IHandoverContent>({
   documentId: { type: Number, required: true, index: true },
   version: { type: Number, required: true },
   content: {
-    sections: [{
-      id: String,
-      title: String,
-      content: String,
-      order: Number,
-      type: String
-    }],
+    sections: { type: Schema.Types.Mixed, required: true },
     attachments: [{
       id: String,
       filename: String,
@@ -126,9 +120,15 @@ export class MongoService {
     version: number;
     content: any;
     createdBy: number;
+    mongoId?: string;
   }): Promise<IHandoverContent> {
     try {
+      const handoverContentId = data.mongoId
+        ? new Types.ObjectId(data.mongoId)
+        : new Types.ObjectId();
+
       const handoverContent = new HandoverContent({
+        _id: handoverContentId,
         documentId: data.documentId,
         version: data.version,
         content: data.content,
@@ -137,7 +137,8 @@ export class MongoService {
       });
 
       const saved = await handoverContent.save();
-      logger.info(`Created handover content for document ${data.documentId}, version ${data.version}`);
+      const savedId = (saved._id as Types.ObjectId).toHexString();
+      logger.info(`Created handover content ${savedId} for document ${data.documentId}, version ${data.version}`);
       return saved;
     } catch (error) {
       logger.error('Failed to create handover content:', error);
@@ -148,7 +149,13 @@ export class MongoService {
   // 인수인계서 본문 조회
   async getContent(mongoId: string): Promise<IHandoverContent | null> {
     try {
-      const content = await HandoverContent.findOne({ _id: mongoId });
+      const objectId = this.toObjectId(mongoId);
+      if (!objectId) {
+        logger.warn(`Invalid mongoId provided when fetching content: ${mongoId}`);
+        return null;
+      }
+
+      const content = await HandoverContent.findById(objectId);
       return content;
     } catch (error) {
       logger.error('Failed to get handover content:', error);
@@ -159,6 +166,12 @@ export class MongoService {
   // 인수인계서 본문 업데이트
   async updateContent(mongoId: string, content: any, updatedBy?: number): Promise<IHandoverContent | null> {
     try {
+      const objectId = this.toObjectId(mongoId);
+      if (!objectId) {
+        logger.warn(`Invalid mongoId provided when updating content: ${mongoId}`);
+        return null;
+      }
+
       const updateData: any = {
         content,
         updatedAt: new Date()
@@ -168,8 +181,8 @@ export class MongoService {
         updateData.updatedBy = updatedBy;
       }
 
-      const updated = await HandoverContent.findOneAndUpdate(
-        { _id: mongoId },
+      const updated = await HandoverContent.findByIdAndUpdate(
+        objectId,
         updateData,
         { new: true }
       );
@@ -188,9 +201,17 @@ export class MongoService {
   // 인수인계서 본문 삭제
   async deleteContent(mongoId: string): Promise<boolean> {
     try {
-      const result = await HandoverContent.deleteOne({ _id: mongoId });
-      logger.info(`Deleted handover content for mongoId ${mongoId}`);
-      return result.deletedCount > 0;
+      const objectId = this.toObjectId(mongoId);
+      if (!objectId) {
+        logger.warn(`Invalid mongoId provided when deleting content: ${mongoId}`);
+        return false;
+      }
+
+      const result = await HandoverContent.deleteOne({ _id: objectId });
+      if (result.deletedCount) {
+        logger.info(`Deleted handover content for mongoId ${mongoId}`);
+      }
+      return (result.deletedCount ?? 0) > 0;
     } catch (error) {
       logger.error('Failed to delete handover content:', error);
       throw error;
@@ -285,6 +306,18 @@ export class MongoService {
     } catch (error) {
       logger.error('Failed to delete handover template:', error);
       throw error;
+    }
+  }
+
+  private toObjectId(mongoId: string): Types.ObjectId | null {
+    if (!mongoId) {
+      return null;
+    }
+
+    try {
+      return new Types.ObjectId(mongoId);
+    } catch (error) {
+      return null;
     }
   }
 }
