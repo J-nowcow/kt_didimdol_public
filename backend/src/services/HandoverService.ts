@@ -7,7 +7,7 @@ import { Prisma } from '@prisma/client';
 
 export interface CreateHandoverDto {
   title: string;
-  content: any;
+  content: Record<string, unknown>;
   status?: string;
   priority?: string;
   category?: string;
@@ -17,7 +17,7 @@ export interface CreateHandoverDto {
 
 export interface UpdateHandoverDto {
   title?: string;
-  content?: any;
+  content?: Record<string, unknown>;
   status?: string;
   priority?: string;
   category?: string;
@@ -45,10 +45,10 @@ export class HandoverService {
 
   // Get all handovers with filters
   async getAllHandovers(filters: HandoverFilters) {
-    const { page, limit, status, search, sortBy, sortOrder, userId } = filters;
+    const { page, limit, status, search, sortBy, sortOrder, userId: _userId } = filters;
     const offset = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Prisma.HandoverDocumentWhereInput = {};
 
     if (status) {
       where.status = status;

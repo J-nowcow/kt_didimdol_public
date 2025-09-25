@@ -27,7 +27,7 @@ export class UserService {
     const { page, limit, search, department } = filters;
     const offset = (page - 1) * limit;
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       isActive: true
     };
 
@@ -120,7 +120,7 @@ export class UserService {
   }
 
   // Update user
-  async updateUser(id: number, data: any, userId: number) {
+  async updateUser(id: number, data: Record<string, unknown>, userId: number) {
     try {
       // Check if user has permission to update
       if (id !== userId) {
@@ -130,9 +130,9 @@ export class UserService {
       const user = await prisma.user.update({
         where: { id },
         data: {
-          fullName: data.fullName,
-          department: data.department,
-          position: data.position,
+          fullName: data.fullName as string,
+          department: data.department as string | null,
+          position: data.position as string | null,
           updatedAt: new Date()
         },
         select: {
@@ -164,7 +164,7 @@ export class UserService {
       const { page, limit, status } = filters;
       const offset = (page - 1) * limit;
 
-      const where: any = {
+      const where: Record<string, unknown> = {
         authorId: userId
       };
 

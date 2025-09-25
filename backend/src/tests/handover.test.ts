@@ -2,7 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import { HandoverController } from '../controllers/HandoverController';
 import { HandoverService } from '../services/HandoverService';
-import { AppError } from '../middleware/errorHandler';
+// import { AppError } from '../middleware/errorHandler';
 
 // Mock dependencies
 jest.mock('../services/HandoverService');
@@ -22,12 +22,12 @@ describe('HandoverController', () => {
     
     // Mock routes
     app.get('/api/handovers', (req, res) => {
-      req.user = { id: 1, username: 'test', email: 'test@test.com' };
+      (req as any).user = { id: 1, username: 'test', email: 'test@test.com' };
       handoverController.getAllHandovers(req as any, res);
     });
     
     app.post('/api/handovers', (req, res) => {
-      req.user = { id: 1, username: 'test', email: 'test@test.com' };
+      (req as any).user = { id: 1, username: 'test', email: 'test@test.com' };
       handoverController.createHandover(req as any, res);
     });
   });
@@ -39,8 +39,26 @@ describe('HandoverController', () => {
           {
             id: 1,
             title: 'Test Handover',
+            authorId: 1,
             status: 'draft',
-            author: { id: 1, username: 'test', fullName: 'Test User' }
+            priority: 'medium',
+            category: null,
+            tags: [],
+            mongoId: 'mongo_123',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            completedAt: null,
+            archivedAt: null,
+            author: { 
+              id: 1, 
+              username: 'test', 
+              fullName: 'Test User',
+              department: null
+            },
+            _count: {
+              shares: 0,
+              comments: 0
+            }
           }
         ],
         pagination: {
@@ -101,7 +119,20 @@ describe('HandoverController', () => {
         title: 'New Handover',
         authorId: 1,
         status: 'draft',
-        mongoId: 'mongo_123'
+        priority: 'medium',
+        category: null,
+        tags: [],
+        mongoId: 'mongo_123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        completedAt: null,
+        archivedAt: null,
+        author: {
+          id: 1,
+          username: 'test',
+          fullName: 'Test User',
+          department: null
+        }
       };
 
       mockHandoverService.createHandover.mockResolvedValue(mockHandover);

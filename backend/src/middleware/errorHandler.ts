@@ -25,7 +25,7 @@ export const errorHandler = (
   error: ApiError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   let { statusCode = 500, message, code = 'INTERNAL_ERROR' } = error;
 
@@ -51,7 +51,7 @@ export const errorHandler = (
     statusCode = 400;
     code = 'INVALID_ID';
     message = 'Invalid ID format';
-  } else if (error.name === 'MongoError' && (error as any).code === 11000) {
+  } else if (error.name === 'MongoError' && (error as unknown as { code?: number }).code === 11000) {
     statusCode = 409;
     code = 'DUPLICATE_KEY';
     message = 'Duplicate field value';

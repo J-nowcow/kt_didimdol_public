@@ -1,6 +1,6 @@
 import { BackupService } from '../services/BackupService';
 import fs from 'fs/promises';
-import path from 'path';
+// import path from 'path';
 
 // Mock fs module
 jest.mock('fs/promises');
@@ -21,7 +21,7 @@ describe('BackupService', () => {
       // Mock file system operations
       mockFs.mkdir.mockResolvedValue(undefined);
       mockFs.writeFile.mockResolvedValue(undefined);
-      mockFs.readdir.mockResolvedValue(['users.json', 'handovers.json', 'metadata.json']);
+      mockFs.readdir.mockResolvedValue(['users.json', 'handovers.json', 'metadata.json'] as any);
 
       const backupId = await backupService.createFullBackup();
 
@@ -44,7 +44,7 @@ describe('BackupService', () => {
         'backup_2024-01-02T00-00-00-000Z.tar.gz'
       ];
 
-      mockFs.readdir.mockResolvedValue(mockFiles);
+      mockFs.readdir.mockResolvedValue(mockFiles as any);
       mockFs.stat.mockResolvedValue({
         size: 1024,
         birthtime: new Date('2024-01-01'),

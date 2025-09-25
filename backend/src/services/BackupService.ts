@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { gzipSync, gunzipSync } from 'zlib';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 import { prisma } from '../config/database';
 import { logger } from '../utils/logger';
@@ -96,7 +96,6 @@ export class BackupService {
   }
 
   private async buildMongoSnapshot(): Promise<MongoSnapshot> {
-    const mongoose = require('mongoose');
     const connection = mongoose.connection;
 
     if (!connection || connection.readyState !== 1) {
@@ -106,7 +105,7 @@ export class BackupService {
 
     const fetchCollection = async (name: string) => {
       try {
-        const docs = await connection.db.collection(name).find({}).toArray();
+        const docs = await connection.db?.collection(name).find({}).toArray() || [];
         return docs.map((doc: any) => serializeForBackup(doc));
       } catch (error) {
         logger.warn(`Failed to snapshot Mongo collection ${name}:`, error);
@@ -122,12 +121,12 @@ export class BackupService {
     return { handovercontents, handovertemplates };
   }
 
-  async getBackupList(): Promise<any[]> {
+  async getBackupList(): Promise<Array<{ id: string; filename: string; size: number; createdAt: Date; modifiedAt: Date }>> {
     await fs.mkdir(this.backupDir, { recursive: true });
 
     try {
       const files = await fs.readdir(this.backupDir);
-      const backups = [] as any[];
+      const backups: Array<{ id: string; filename: string; size: number; createdAt: Date; modifiedAt: Date }> = [];
 
       for (const file of files) {
         if (!file.startsWith('backup_') || !file.endsWith('.json.gz')) continue;
@@ -233,7 +232,6 @@ export class BackupService {
   }
 
   private async restoreMongo(data: MongoSnapshot): Promise<void> {
-    const mongoose = require('mongoose');
     const connection = mongoose.connection;
 
     if (!connection || connection.readyState !== 1) {
@@ -242,7 +240,9 @@ export class BackupService {
     }
 
     const restoreCollection = async (name: string, docs: any[]) => {
-      const collection = connection.db.collection(name);
+      const collection = connection.db?.collection(name);
+      if (!collection) return;
+      
       await collection.deleteMany({});
 
       if (!docs.length) return;
@@ -274,7 +274,7 @@ async deleteBackup(backupId: string): Promise<boolean> {
     }
   }
 
-  async getBackupStatus(): Promise<any> {
+  async getBackupStatus(): Promise<{ totalBackups: number; totalSize: number; lastBackup: Date | null; backupDir: string }> {
     try {
       const backups = await this.getBackupList();
       const totalSize = backups.reduce((sum, backup) => sum + backup.size, 0);
@@ -321,7 +321,7 @@ function serializeForBackup(value: any): any {
       return value.map((entry) => serializeForBackup(entry));
     }
 
-    const serialized: Record<string, any> = {};
+    const serialized: any = {};
     for (const [key, nested] of Object.entries(value)) {
       serialized[key] = serializeForBackup(nested);
     }
@@ -336,7 +336,7 @@ function hydrateMongoDocument(doc: any): any {
     return doc;
   }
 
-  const hydrated: Record<string, any> = {};
+  const hydrated: any = {};
   for (const [key, value] of Object.entries(doc)) {
     if (key === '_id' && typeof value === 'string') {
       hydrated._id = new Types.ObjectId(value);
