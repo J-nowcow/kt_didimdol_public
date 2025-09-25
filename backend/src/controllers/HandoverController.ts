@@ -23,7 +23,7 @@ export class HandoverController {
         search: search as string,
         sortBy: sortBy as string,
         sortOrder: sortOrder as string,
-        userId: process.env.NODE_ENV === 'development' ? 1 : requireUserId(req)
+        userId: requireUserId(req)
       });
 
       res.json({
@@ -42,7 +42,7 @@ export class HandoverController {
 
       const handoverData = {
         ...req.body,
-        authorId: process.env.NODE_ENV === 'development' ? 1 : requireUserId(req)
+        authorId: requireUserId(req)
       };
 
       const handover = await this.handoverService.createHandover(handoverData);
