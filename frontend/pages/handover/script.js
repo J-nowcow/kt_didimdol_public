@@ -1,4 +1,4 @@
-// 인수인계서 작성 페이지 JavaScript (UI 중심 + Mock AI 응답 + 5초 자동저장)
+// 인수인계서 작성 페이지 JavaScript (API 연동 + 자동저장 강화)
 
 // API 모듈 안전하게 로드
 const DidimdolAPI = window.DidimdolAPI || {};
@@ -7,7 +7,7 @@ const HandoverService = DidimdolAPI.HandoverAPI;
 
 const LOCAL_STORAGE_KEY = 'didimdol.handoverDraft';
 const SAVE_DEBOUNCE_MS = 1500;
-const AUTO_SAVE_MS = 5000; // 5초 자동저장 (UI 중심)
+const AUTO_SAVE_MS = 5000;
 
 let chatMessages = [];
 let handoverData = {
@@ -70,26 +70,26 @@ const questionFlow = [
 
 const aiResponses = {
     basic: [
-        '네, 기본 정보를 잘 정리해드리겠습니다. (Mock AI 응답)',
-        '알겠습니다. 기본 정보를 기록했습니다. (Mock AI 응답)',
-        '좋습니다. 이제 다음 단계로 넘어가겠습니다. (Mock AI 응답)'
+        '네, 기본 정보를 잘 정리해드리겠습니다.',
+        '알겠습니다. 기본 정보를 기록했습니다.',
+        '좋습니다. 이제 다음 단계로 넘어가겠습니다.'
     ],
     detailed: [
-        '상세한 내용을 잘 정리했습니다. (Mock AI 응답)',
-        '네, 상세 정보를 기록했습니다. (Mock AI 응답)',
-        '좋습니다. 이제 마지막 단계입니다. (Mock AI 응답)'
+        '상세한 내용을 잘 정리했습니다.',
+        '네, 상세 정보를 기록했습니다.',
+        '좋습니다. 이제 마지막 단계입니다.'
     ],
     attachments: [
-        '첨부 파일을 확인했습니다. (Mock AI 응답)',
-        '네, 추가 정보를 기록했습니다. (Mock AI 응답)',
-        '완벽합니다! 인수인계서가 거의 완성되었습니다. (Mock AI 응답)'
+        '첨부 파일을 확인했습니다.',
+        '네, 추가 정보를 기록했습니다.',
+        '완벽합니다! 인수인계서가 거의 완성되었습니다.'
     ],
     general: [
-        '네, 이해했습니다. (Mock AI 응답)',
-        '좋은 정보네요. 기록하겠습니다. (Mock AI 응답)',
-        '알겠습니다. 계속 진행하겠습니다. (Mock AI 응답)',
-        '네, 잘 정리했습니다. (Mock AI 응답)',
-        '좋습니다. 다음 질문을 드리겠습니다. (Mock AI 응답)'
+        '네, 이해했습니다.',
+        '좋은 정보네요. 기록하겠습니다.',
+        '알겠습니다. 계속 진행하겠습니다.',
+        '네, 잘 정리했습니다.',
+        '좋습니다. 다음 질문을 드리겠습니다.'
     ]
 };
 
@@ -359,8 +359,12 @@ function setupEventListeners() {
 
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarClose = document.getElementById('sidebarClose');
+    const completeButton = document.getElementById('completeButton');
     sidebarToggle.addEventListener('click', toggleSidebar);
     sidebarClose.addEventListener('click', closeSidebar);
+    if (completeButton) {
+        completeButton.addEventListener('click', handleCompleteFromEditor);
+    }
 
     // 뒤로가기 버튼 이벤트 리스너 추가
     const backButton = document.getElementById('backButton');
@@ -836,3 +840,26 @@ function goBack() {
 }
 
 // goBack 함수는 이벤트 리스너로 처리하므로 전역 할당 불필요
+
+async function handleCompleteFromEditor() {
+    if (!currentHandoverId) {
+        alert('완료 처리할 인수인계서가 없습니다.');
+        return;
+    }
+    if (!confirm('이 인수인계서를 완료 처리하시겠습니까? 완료 후에도 언제든지 다시 수정할 수 있습니다.')) {
+        return;
+    }
+    try {
+        if (!HandoverService) {
+            throw new Error('HandoverAPI가 초기화되지 않았습니다.');
+        }
+        const payload = buildHandoverPayload();
+        payload.status = 'completed';
+        await HandoverService.update(currentHandoverId, payload);
+        updateSaveStatus('완료됨', '방금 전');
+        alert('인수인계서가 완료 처리되었습니다.');
+    } catch (error) {
+        const message = DidimdolAPI.ErrorHandler ? DidimdolAPI.ErrorHandler.getErrorMessage(error) : error.message;
+        alert(`완료 처리 실패: ${message}`);
+    }
+}

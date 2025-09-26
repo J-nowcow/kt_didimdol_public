@@ -118,9 +118,173 @@
     margin-bottom: 16px;
 }
 
+.status-badge.draft {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.in_progress,
 .status-badge.in-progress {
     background-color: #0fba82;
     color: #ffffff;
+}
+
+.status-badge.completed {
+    background-color: #e0f2fe;
+    color: #1d4ed8;
+}
+
+.status-badge.archived {
+    background-color: #e5e7eb;
+    color: #4b5563;
+}
+
+/* 인수인계서 검색/목록 섹션 */
+.handover-search-section {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e6e6e6;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.handover-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.handover-search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.handover-filter {
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #ffffff;
+}
+
+.handover-search-button {
+    background-color: #111827;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.handover-search-button:hover {
+    background-color: #1f2937;
+}
+
+.handover-results {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 120px;
+}
+
+.handover-results.loading {
+    opacity: 0.7;
+}
+
+.handover-result-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    background-color: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.handover-result-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.handover-result-title .title-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    flex: 1;
+}
+
+.handover-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.handover-result-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.handover-result-actions button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background-color: #ffffff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.handover-result-actions button:hover {
+    background-color: #f3f4f6;
+}
+
+.handover-pagination {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.pagination-button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.pagination-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.pagination-button:not(:disabled):hover {
+    background-color: #f3f4f6;
+}
+
+.handover-empty,
+.handover-loading {
+    padding: 24px;
+    text-align: center;
+    color: #6b7280;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    border: 1px dashed #d1d5db;
 }
 
 /* 새 인수인계서 작성 섹션 */
@@ -639,4 +803,42 @@ body:not(.loaded) .dashboard-container {
 body.loaded .dashboard-container {
     opacity: 1;
     transition: opacity 0.3s ease;
+}
+
+/* 액션 버튼 스타일 */
+.result-open,
+.result-share,
+.result-complete {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #e6e6e6;
+    background-color: #ffffff;
+    color: #333333;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 8px;
+}
+
+.result-open:hover {
+    background-color: #f8f9fa;
+    border-color: #d1d5db;
+}
+
+.result-complete {
+    background-color: #10b981;
+    color: #ffffff;
+    border-color: #10b981;
+}
+
+.result-complete:hover {
+    background-color: #059669;
+    border-color: #059669;
+}
+
+.result-share:disabled {
+    background-color: #f8f9fa;
+    color: #9ca3af;
+    cursor: not-allowed;
 }

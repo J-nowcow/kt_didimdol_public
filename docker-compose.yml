@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: didimdol-postgres
+    environment:
+      POSTGRES_DB: didimdol
+      POSTGRES_USER: didimdol
+      POSTGRES_PASSWORD: didimdol123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - didimdol-network
+
+  mongodb:
+    image: mongo:6
+    container_name: didimdol-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: didimdol
+      MONGO_INITDB_ROOT_PASSWORD: didimdol123
+      MONGO_INITDB_DATABASE: didimdol
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./backend/init-scripts/mongo:/docker-entrypoint-initdb.d
+    networks:
+      - didimdol-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: didimdol-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - didimdol-network
+
+  backend:
+    build: ./backend
+    container_name: didimdol-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://didimdol:didimdol123@postgres:5432/didimdol
+      - MONGODB_URI=mongodb://didimdol:didimdol123@mongodb:27017/didimdol?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=didimdol-jwt-secret-key-2024
+      - ENCRYPTION_KEY=didimdol-encryption-key-32-chars
+    depends_on:
+      - postgres
+      - mongodb
+      - redis
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - didimdol-network
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+
+networks:
+  didimdol-network:
+    driver: bridge

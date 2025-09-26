@@ -1,0 +1,95 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int                @id @default(autoincrement())
+  username       String             @unique
+  email          String             @unique
+  fullName       String
+  department     String?
+  position       String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  isActive       Boolean            @default(true)
+  comments       HandoverComment[]
+  handovers      HandoverDocument[]
+  shares         HandoverShare[]    @relation("SharedBy")
+  sharesReceived HandoverShare[]    @relation("SharedWith")
+  versions       HandoverVersion[]  @relation("VersionCreator")
+
+  @@map("users")
+}
+
+model HandoverDocument {
+  id          Int               @id @default(autoincrement())
+  title       String
+  authorId    Int
+  status      String            @default("draft")
+  priority    String            @default("medium")
+  category    String?
+  tags        String[]
+  mongoId     String            @unique
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  completedAt DateTime?
+  archivedAt  DateTime?
+  comments    HandoverComment[]
+  author      User              @relation(fields: [authorId], references: [id])
+  shares      HandoverShare[]
+  versions    HandoverVersion[]
+
+  @@map("handover_documents")
+}
+
+model HandoverVersion {
+  id            Int              @id @default(autoincrement())
+  documentId    Int
+  versionNumber Int
+  mongoId       String
+  createdAt     DateTime         @default(now())
+  createdBy     Int
+  changeSummary String?
+  creator       User             @relation("VersionCreator", fields: [createdBy], references: [id])
+  document      HandoverDocument @relation(fields: [documentId], references: [id])
+
+  @@map("handover_versions")
+}
+
+model HandoverShare {
+  id               Int              @id @default(autoincrement())
+  documentId       Int
+  sharedWithUserId Int
+  permissionLevel  String           @default("read")
+  sharedAt         DateTime         @default(now())
+  sharedBy         Int
+  expiresAt        DateTime?
+  document         HandoverDocument @relation(fields: [documentId], references: [id])
+  sharer           User             @relation("SharedBy", fields: [sharedBy], references: [id])
+  sharedWithUser   User             @relation("SharedWith", fields: [sharedWithUserId], references: [id])
+
+  @@map("handover_shares")
+}
+
+model HandoverComment {
+  id              Int               @id @default(autoincrement())
+  documentId      Int
+  authorId        Int
+  content         String
+  parentCommentId Int?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  isDeleted       Boolean           @default(false)
+  author          User              @relation(fields: [authorId], references: [id])
+  document        HandoverDocument  @relation(fields: [documentId], references: [id])
+  parentComment   HandoverComment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies         HandoverComment[] @relation("CommentReplies")
+
+  @@map("handover_comments")
+}

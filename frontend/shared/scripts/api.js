@@ -4,7 +4,7 @@
  * API 기본 설정
  */
 const API_CONFIG = {
-    baseURL: '/api/v1',
+    baseURL: 'http://localhost:3000/api',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
@@ -81,6 +81,11 @@ class ApiClient {
             ...options
         };
 
+        const token = this.getAuthToken();
+        if (token && !config.headers.Authorization) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+
         if (data) {
             config.body = JSON.stringify(data);
         }
@@ -99,7 +104,17 @@ class ApiClient {
             clearTimeout(timeoutId);
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                let errorPayload = null;
+                try {
+                    errorPayload = await response.json();
+                } catch (parseError) {
+                    // swallow – we'll fall back to status text below
+                }
+
+                const errorMessage = errorPayload?.error?.message || response.statusText;
+                const error = new Error(`HTTP ${response.status}: ${errorMessage}`);
+                error.response = errorPayload || { status: response.status };
+                throw error;
             }
             
             const contentType = response.headers.get('content-type');
@@ -115,6 +130,14 @@ class ApiClient {
             throw error;
         }
     }
+
+    getAuthToken() {
+        try {
+            return window.localStorage.getItem('didimdol.authToken');
+        } catch (error) {
+            return null;
+        }
+    }
 }
 
 /**
@@ -125,7 +148,7 @@ const apiClient = new ApiClient();
 /**
  * 인수인계서 관련 API
  */
-export const HandoverAPI = {
+const HandoverAPI = {
     /**
      * 인수인계서 목록 조회
      * @param {Object} params - 쿼리 파라미터
@@ -176,7 +199,7 @@ export const HandoverAPI = {
 /**
  * 시스템 연결 상태 관련 API
  */
-export const SystemAPI = {
+const SystemAPI = {
     /**
      * 시스템 연결 상태 조회
      * @returns {Promise}
@@ -198,7 +221,7 @@ export const SystemAPI = {
 /**
  * 수집된 자료 관련 API
  */
-export const MaterialsAPI = {
+const MaterialsAPI = {
     /**
      * 수집된 자료 현황 조회
      * @returns {Promise}
@@ -220,7 +243,7 @@ export const MaterialsAPI = {
 /**
  * 사용자 관련 API
  */
-export const UserAPI = {
+const UserAPI = {
     /**
      * 현재 사용자 정보 조회
      * @returns {Promise}
@@ -250,7 +273,7 @@ export const UserAPI = {
 /**
  * 에러 처리 유틸리티
  */
-export const ErrorHandler = {
+const ErrorHandler = {
     /**
      * API 에러를 사용자 친화적 메시지로 변환
      * @param {Error} error - 에러 객체
@@ -289,7 +312,7 @@ export const ErrorHandler = {
 /**
  * API 응답 인터셉터
  */
-export const ResponseInterceptor = {
+const ResponseInterceptor = {
     /**
      * 성공 응답 처리
      * @param {any} response - API 응답
