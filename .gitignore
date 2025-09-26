@@ -1,4 +1,5 @@
-# .bmad-core/
+.bmad-core/
+bmad-core/
 
 # 환경 변수 파일들 (보안상 중요!)
 *.env
